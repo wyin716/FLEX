@@ -279,13 +279,16 @@ didBecomeDownloadTask:(NSURLSessionDownloadTask *)downloadTask delegate:(id <NSU
         // In iOS 7 resume lives in __NSCFLocalSessionTask
         // In iOS 8 resume lives in NSURLSessionTask
         // In iOS 9 resume lives in __NSCFURLSessionTask
+        // In iOS 14 resume lives in __NSCFLocalSessionTask
         Class class = Nil;
         if (![[NSProcessInfo processInfo] respondsToSelector:@selector(operatingSystemVersion)]) {
             class = NSClassFromString([@[@"__", @"NSC", @"FLocalS", @"ession", @"Task"] componentsJoinedByString:@""]);
         } else if ([[NSProcessInfo processInfo] operatingSystemVersion].majorVersion < 9) {
             class = [NSURLSessionTask class];
-        } else {
+        } else if ([[NSProcessInfo processInfo] operatingSystemVersion].majorVersion < 14) {
             class = NSClassFromString([@[@"__", @"NSC", @"FURLS", @"ession", @"Task"] componentsJoinedByString:@""]);
+        } else {
+            class = NSClassFromString([@[@"__", @"NSC", @"FLocalS", @"ession", @"Task"] componentsJoinedByString:@""]);
         }
         SEL selector = @selector(resume);
         SEL swizzledSelector = [FLEXUtility swizzledSelectorForSelector:selector];
